@@ -25,4 +25,11 @@ O projeto segue a Clean Architecture com as seguintes camadas:
 ## Executando Testes
 
 ```bash
-pytest
+poetry run python -m pytest --cov=src --cov-report=term-missing
+```
+
+
+
+## TODO
+- Improve email validation
+- Create a validator class
