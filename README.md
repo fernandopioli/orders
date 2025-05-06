@@ -28,7 +28,7 @@ O projeto segue a Clean Architecture com as seguintes camadas:
 poetry run python -m pytest --cov=src --cov-report=term-missing
 ```
 
-
+poetry env info --path
 
 ## TODO
 - Improve email validation

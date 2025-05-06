@@ -41,6 +41,9 @@ class Customer(Entity):
         
         super().update()
 
+    def delete(self):
+        super()._Entity__delete()
+
     @classmethod
     def load(
         cls,

@@ -26,7 +26,7 @@ class Entity(ABC):
     def update(self) -> None:
         self.updated_at = datetime.now()
 
-    def delete(self) -> None:
+    def __delete(self) -> None:
         self.deleted_at = datetime.now()
         self.is_deleted = True
 

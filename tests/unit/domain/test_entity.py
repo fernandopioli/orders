@@ -6,13 +6,15 @@ import pytest
 
 from src.domain.entity import Entity
 
-
 class ConcreteEntity(Entity):
     def validate(self) -> None:
         pass
 
     def to_dict(self):
         return super().to_dict()
+
+    def delete(self):
+        super()._Entity__delete()
 
     @classmethod
     def from_dict(cls, data):
@@ -101,11 +103,15 @@ class TestEntity:
         assert "deleted_at" in entity_dict
 
         assert isinstance(entity_dict["id"], str)
+        assert entity_dict["id"] == str(concrete_entity.id)
         assert isinstance(entity_dict["created_at"], str)
+        assert entity_dict["created_at"] == concrete_entity.created_at.isoformat()
         assert isinstance(entity_dict["updated_at"], str)
+        assert entity_dict["updated_at"] == concrete_entity.updated_at.isoformat()
         if entity_dict["deleted_at"] is not None:
             assert isinstance(entity_dict["deleted_at"], str)
-
+            assert entity_dict["deleted_at"] == concrete_entity.deleted_at.isoformat()
+            
     def test_from_dict_creates_valid_instance(self, concrete_entity):
         entity_dict = concrete_entity.to_dict()
         new_entity = ConcreteEntity.from_dict(entity_dict)
@@ -124,6 +130,12 @@ class TestEntity:
             Entity.validate()
         except Exception as e:
             pytest.fail(f"validate() raised an exception: {e}")
+
+    def test_to_dict_does_not_raise_exception(self, concrete_entity):
+        try:
+            concrete_entity.to_dict()
+        except Exception as e:
+            pytest.fail(f"to_dict() raised an exception: {e}")
             
     def test_from_dict_does_not_raise_exception(self, concrete_entity):
         entity_dict = concrete_entity.to_dict()
