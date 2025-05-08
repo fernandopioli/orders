@@ -110,7 +110,7 @@ class TestCustomer:
         deleted_at = datetime.now() - timedelta(days=1)
         
         customer = Customer.load(
-            id=customer_id,
+            id=str(customer_id),
             name="any_name",
             email="any_email@mail.com",
             created_at=created_at,
@@ -162,12 +162,19 @@ class TestCustomer:
 
     def test_create_from_dict(self):
         data = {
+            "id": str(uuid.uuid4()),
             "name": "any_name",
-            "email": "any_email@mail.com"
+            "email": "any_email@mail.com",
+            "created_at": datetime.now(),
+            "updated_at": datetime.now(),
+            "deleted_at": datetime.now()
         }
         
         customer = Customer.from_dict(data)
         
         assert customer.name == "any_name"
         assert customer.email == "any_email@mail.com"
-        assert isinstance(customer.id, uuid.UUID) 
+        assert str(customer.id) == data["id"]
+        assert customer.created_at == data["created_at"]
+        assert customer.updated_at == data["updated_at"]
+        assert customer.deleted_at == data["deleted_at"]

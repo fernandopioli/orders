@@ -16,13 +16,13 @@ class TestOrder:
         total = 100.50
         
         order = Order.create(
-            customer_id=customer_id,
+            customer_id=str(customer_id),
             total=total
         )
         
         assert isinstance(order, Entity)
         assert isinstance(order.id, uuid.UUID)
-        assert order.customer_id == customer_id
+        assert str(order.customer_id) == str(customer_id)
         assert order.total == total
         assert isinstance(order.created_at, datetime)
         assert isinstance(order.updated_at, datetime)
@@ -65,7 +65,7 @@ class TestOrder:
     def test_update_order_total(self, valid_customer):
         
         order = Order.create(
-            customer_id=valid_customer.id,
+            customer_id=str(valid_customer.id),
             total=100.0
         )
         original_updated_at = order.updated_at
@@ -77,11 +77,11 @@ class TestOrder:
         
         assert order.total == 200.0
         assert order.updated_at > original_updated_at
-        assert order.customer_id == valid_customer.id
+        assert str(order.customer_id) == str(valid_customer.id)
     
     def test_update_order_with_invalid_total(self, valid_customer):
         order = Order.create(
-            customer_id=valid_customer.id,
+            customer_id=str(valid_customer.id),
             total=100.0
         )
         non_numeric_values = [
@@ -99,7 +99,7 @@ class TestOrder:
 
     def test_update_order_with_negative_or_zero_total(self, valid_customer):
         order = Order.create(
-            customer_id=valid_customer.id,
+            customer_id=str(valid_customer.id),
             total=100.0
         )
         
@@ -124,16 +124,16 @@ class TestOrder:
         deleted_at = datetime.now() - timedelta(days=1)
         
         order = Order.load(
-            id=order_id,
-            customer_id=customer_id,
+            id=str(order_id),
+            customer_id=str(customer_id),
             total=total,
             created_at=created_at,
             updated_at=updated_at,
             deleted_at=deleted_at
         )
         
-        assert order.id == order_id
-        assert order.customer_id == customer_id
+        assert str(order.id) == str(order_id)
+        assert str(order.customer_id) == str(customer_id)
         assert order.total == total
         assert order.created_at == created_at
         assert order.updated_at == updated_at
@@ -142,7 +142,7 @@ class TestOrder:
 
     def test_order_soft_delete(self, valid_customer):
         order = Order.create(
-            customer_id=valid_customer.id,
+            customer_id=str(valid_customer.id),
             total=100.0
         )
         assert order.is_deleted is False
@@ -154,7 +154,7 @@ class TestOrder:
         assert isinstance(order.deleted_at, datetime)
         
         assert order.total == 100.0
-        assert order.customer_id == valid_customer.id
+        assert str(order.customer_id) == str(valid_customer.id)
 
     def test_order_to_dict(self, valid_customer):
         order_id = uuid.uuid4()
@@ -163,7 +163,7 @@ class TestOrder:
         
         order = Order(
             id=order_id,
-            customer_id=customer_id,
+            customer_id=str(customer_id),
             total=total
         )
         
@@ -178,17 +178,19 @@ class TestOrder:
 
     def test_create_from_dict(self, valid_customer):
         data = {
+            "id": str(uuid.uuid4()),
             "customer_id": str(valid_customer.id),
-            "total": 100.0
+            "total": 100.0,
+            "created_at": datetime.now(),
+            "updated_at": datetime.now(),
+            "deleted_at": datetime.now()
         }
         
         order = Order.from_dict(data)
         
-        # assert isinstance(order, Order)
-        # assert order.customer_id == valid_customer.id
-        # assert order.total == 100.0
-        # assert isinstance(order.id, uuid.UUID)
-        # assert isinstance(order.created_at, datetime)
-        # assert isinstance(order.updated_at, datetime)
-        # assert order.deleted_at is None
-        # assert order.is_deleted is False
+        assert str(order.id) == str(data["id"])
+        assert str(order.customer_id) == str(data["customer_id"])
+        assert order.total == data["total"]
+        assert order.created_at == data["created_at"]
+        assert order.updated_at == data["updated_at"]
+        assert order.deleted_at == data["deleted_at"]

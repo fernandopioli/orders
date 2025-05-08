@@ -13,9 +13,6 @@ class ConcreteEntity(Entity):
     def to_dict(self):
         return super().to_dict()
 
-    def delete(self):
-        super()._Entity__delete()
-
     @classmethod
     def from_dict(cls, data):
         return cls(
