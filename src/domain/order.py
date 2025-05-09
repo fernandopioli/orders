@@ -6,8 +6,6 @@ from src.domain.core import Entity, Result
 from src.domain.validation import Validator
 from src.domain.errors import ValidationError
 
-
-
 class Order(Entity):
     def __init__(
         self,   
@@ -35,9 +33,7 @@ class Order(Entity):
     def validate(total, customer_id) -> Result[List[ValidationError] | None]:
         validator = Validator()
         
-        validator.field(total, "total") \
-            .required() \
-            .currency()
+        Order._validate_total(validator, total)
             
         validator.field(customer_id, "customer_id") \
             .required() \
@@ -49,6 +45,12 @@ class Order(Entity):
             return Result.fail(result.errors)
         
         return Result.ok()
+
+    @staticmethod
+    def _validate_total(validator: Validator, total) -> None:
+        validator.field(total, "total") \
+        .required() \
+        .currency()
         
     @classmethod
     def load(cls, id: str, customer_id: str, total: float, created_at: datetime, updated_at: datetime, deleted_at: Optional[datetime] = None) -> Result["Order"]:
@@ -67,9 +69,7 @@ class Order(Entity):
     def validate_total(self, total) -> Result[List[ValidationError] | None]:
         validator = Validator()
         
-        validator.field(total, "total") \
-            .required() \
-            .currency()
+        Order._validate_total(validator, total)
         
         result = validator.validate()
         

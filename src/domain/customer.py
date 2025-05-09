@@ -39,17 +39,19 @@ class Customer(Entity):
         ))
     
     @staticmethod
-    def validate(name, email) -> Result[List[ValidationError] | None]:      
+    def validate(name, email, creating: bool = True) -> Result[List[ValidationError] | None]:      
         validator = Validator()
+
+        name_validator = validator.field(name, "name")
+        email_validator = validator.field(email, "email")
         
-        validator.field(name, "name") \
-            .required() \
-            .min_length(3)
-            
-        validator.field(email, "email") \
-            .required() \
-            .email()
-        
+        if creating:
+            name_validator.required()
+            email_validator.required()
+
+        name_validator.min_length(3)
+        email_validator.email()
+
         result = validator.validate()
 
         if result.failure:
@@ -77,7 +79,7 @@ class Customer(Entity):
         ))
     
     def update(self, name: str | None = None, email: str | None = None) -> Result[None]:
-        result = self.validate_on_update(name, email)
+        result = Customer.validate(name, email, False)
         if result.failure:
             return Result.fail(result.errors)
         
@@ -89,23 +91,6 @@ class Customer(Entity):
         
         return Result.ok()
 
-    def validate_on_update(self, name: str | None = None, email: str | None = None) -> Result[List[ValidationError] | None]:  
-        validator = Validator()
-        
-        if name:
-            validator.field(name, "name") \
-                .min_length(3)
-                
-        if email:
-            validator.field(email, "email") \
-                .email()
-                
-        result = validator.validate()
-
-        if result.failure:
-            return Result.fail(result.errors)
-        return Result.ok()
-            
     def to_dict(self) -> Dict[str, Any]:
         result = super().to_dict()
         result.update({
