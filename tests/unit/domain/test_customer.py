@@ -1,11 +1,9 @@
+import pytest
 import uuid
 from datetime import datetime, timedelta
 
-import pytest
-
 from src.domain.customer import Customer
-from src.domain.entity import Entity
-
+from src.domain.errors import RequiredError, MinLengthError, EmailError
 
 class TestCustomer:
 
@@ -13,55 +11,60 @@ class TestCustomer:
         name = "Any name"
         email = "any_email@mail.com"
 
-        customer = Customer.create(name=name, email=email)
+        result = Customer.create(name=name, email=email)
 
-        assert isinstance(customer, Entity)
-        assert isinstance(customer.id, uuid.UUID)
-        assert customer.name == name
-        assert customer.email == email
-        assert isinstance(customer.created_at, datetime)
-        assert isinstance(customer.updated_at, datetime)
-        assert customer.deleted_at is None
-        assert customer.is_deleted is False
+        assert result.success is True
+        assert isinstance(result.value, Customer)
+        assert isinstance(result.value.id, uuid.UUID)
+        assert result.value.name == name
+        assert result.value.email == email
+        assert isinstance(result.value.created_at, datetime)
+        assert isinstance(result.value.updated_at, datetime)
+        assert result.value.deleted_at is None
+        assert result.value.is_deleted is False
 
     def test_customer_with_empty_name(self):
         empty_name = ""
         email = "any_email@mail.com"
 
-        with pytest.raises(ValueError) as excinfo:
-            Customer.create(name=empty_name, email=email)
+        result = Customer.create(name=empty_name, email=email)
 
-        assert "Name cannot be empty" in str(excinfo.value)
-
-    def test_customer_with_empty_name_with_space(self):
-        empty_name = " "
-        email = "any_email@mail.com"
-
-        with pytest.raises(ValueError) as excinfo:
-            Customer.create(name=empty_name, email=email)
-
-        assert "Name cannot be empty" in str(excinfo.value)
+        assert result.failure is True
+        assert len(result.errors) == 1
+        assert result.errors[0] == RequiredError("name")
 
     def test_customer_with_less_than_3_chars(self):
         short_name = "ab"
         email = "any_email@mail.com"
 
-        with pytest.raises(ValueError) as excinfo:
-            Customer.create(name=short_name, email=email)
+        result = Customer.create(name=short_name, email=email)
 
-        assert "Name must have at least 3 characters" in str(excinfo.value)
+        assert result.failure is True
+        assert len(result.errors) == 1
+        assert result.errors[0] == MinLengthError("name", 3, short_name)
+
+    def test_customer_with_empty_email(self):
+        name = "Any Name"
+        empty_email = ""
+
+        result = Customer.create(name=name, email=empty_email)
+
+        assert result.failure is True
+        assert len(result.errors) == 1
+        assert result.errors[0] == RequiredError("email")
 
     def test_customer_with_invalid_email(self):
         name = "Any Name"
         invalid_email = "invalid-email"
 
-        with pytest.raises(ValueError) as excinfo:
-            Customer.create(name=name, email=invalid_email)
+        result = Customer.create(name=name, email=invalid_email)
 
-        assert "Invalid email format" in str(excinfo.value)
+        assert result.failure is True
+        assert len(result.errors) == 1
+        assert result.errors[0] == EmailError("email", invalid_email)
 
     def test_update_customer_data(self):
-        customer = Customer.create(name="original_name", email="original@mail.com")
+        customer = Customer.create(name="original_name", email="original@mail.com").value
 
         customer.update(name="new_name", email="new@mail.com")
 
@@ -70,7 +73,7 @@ class TestCustomer:
         assert customer.updated_at > customer.created_at
 
     def test_update_customer_data_with_only_name(self):
-        customer = Customer.create(name="original_name", email="original@mail.com")
+        customer = Customer.create(name="original_name", email="original@mail.com").value
 
         customer.update(name="new_name")
 
@@ -78,7 +81,7 @@ class TestCustomer:
         assert customer.email == "original@mail.com"
 
     def test_update_customer_data_with_only_email(self):
-        customer = Customer.create(name="original_name", email="original@mail.com")
+        customer = Customer.create(name="original_name", email="original@mail.com").value
 
         customer.update(email="new@mail.com")
 
@@ -87,21 +90,23 @@ class TestCustomer:
 
     def test_validate_name_on_update_method(self):
 
-        with pytest.raises(ValueError) as excinfo:
-            customer = Customer.create(name="original_name", email="original@mail.com")
+        customer = Customer.create(name="original_name", email="original@mail.com").value
 
-            customer.update(name="ab", email="new@mail.com")
+        result = customer.update(name="ab", email="new@mail.com")
 
-        assert "Name must have at least 3 characters" in str(excinfo.value)
+        assert result.failure is True
+        assert len(result.errors) == 1
+        assert result.errors[0] == MinLengthError("name", 3, "ab")
 
     def test_validate_email_on_update_method(self):
 
-        with pytest.raises(ValueError) as excinfo:
-            customer = Customer.create(name="original_name", email="original@mail.com")
+        customer = Customer.create(name="original_name", email="original@mail.com").value
 
-            customer.update(name="new_name", email="invalid-email")
+        result = customer.update(name="new_name", email="invalid-email")
 
-        assert "Invalid email format" in str(excinfo.value)
+        assert result.failure is True
+        assert len(result.errors) == 1
+        assert result.errors[0] == EmailError("email", "invalid-email")
 
     def test_load_existing_customer(self):
         customer_id = uuid.uuid4()
@@ -109,7 +114,7 @@ class TestCustomer:
         updated_at = datetime.now() - timedelta(days=2)
         deleted_at = datetime.now() - timedelta(days=1)
         
-        customer = Customer.load(
+        result = Customer.load(
             id=str(customer_id),
             name="any_name",
             email="any_email@mail.com",
@@ -118,19 +123,21 @@ class TestCustomer:
             deleted_at=deleted_at
         )
         
-        assert customer.id == customer_id
-        assert customer.name == "any_name"
-        assert customer.email == "any_email@mail.com"
-        assert customer.created_at == created_at
-        assert customer.updated_at == updated_at
-        assert customer.deleted_at == deleted_at
-        assert customer.is_deleted is True
+        assert result.success is True
+        assert isinstance(result.value, Customer)
+        assert result.value.id == customer_id
+        assert result.value.name == "any_name"
+        assert result.value.email == "any_email@mail.com"
+        assert result.value.created_at == created_at
+        assert result.value.updated_at == updated_at
+        assert result.value.deleted_at == deleted_at
+        assert result.value.is_deleted is True
 
     def test_customer_soft_delete(self):
         customer = Customer.create(
             name="any_name",
             email="any_email@mail.com"
-        )
+        ).value
         assert customer.is_deleted is False
         assert customer.deleted_at is None
         
@@ -144,11 +151,14 @@ class TestCustomer:
 
     def test_customer_to_dict(self):
         customer_id = uuid.uuid4()
-        customer = Customer(
-            id=customer_id,
+        customer = Customer.load(
+            id=str(customer_id),
             name="any_name", 
-            email="any_email@mail.com"
-        )
+            email="any_email@mail.com",
+            created_at=datetime.now(),
+            updated_at=datetime.now(),
+            deleted_at=datetime.now()
+        ).value
         
         result = customer.to_dict()
         
@@ -170,11 +180,13 @@ class TestCustomer:
             "deleted_at": datetime.now()
         }
         
-        customer = Customer.from_dict(data)
+        result = Customer.from_dict(data)
         
-        assert customer.name == "any_name"
-        assert customer.email == "any_email@mail.com"
-        assert str(customer.id) == data["id"]
-        assert customer.created_at == data["created_at"]
-        assert customer.updated_at == data["updated_at"]
-        assert customer.deleted_at == data["deleted_at"]
+        assert result.success is True
+        assert isinstance(result.value, Customer)
+        assert result.value.name == "any_name"
+        assert result.value.email == "any_email@mail.com"
+        assert str(result.value.id) == data["id"]
+        assert result.value.created_at == data["created_at"]
+        assert result.value.updated_at == data["updated_at"]
+        assert result.value.deleted_at == data["deleted_at"]

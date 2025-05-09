@@ -3,46 +3,59 @@ import uuid
 from datetime import datetime, timedelta
 
 from src.domain.order import Order
-from src.domain.entity import Entity
 from src.domain.customer import Customer
+from src.domain.errors import CurrencyError, RequiredError, UUIDFormatError
 
 class TestOrder:
     @pytest.fixture
     def valid_customer(self):
-        return Customer.create(name="any_name", email="any_email@mail.com")
+        return Customer.create(name="any_name", email="any_email@mail.com").value
 
     def test_create_order_with_valid_data(self, valid_customer):
         customer_id = valid_customer.id
         total = 100.50
         
-        order = Order.create(
+        result = Order.create(
             customer_id=str(customer_id),
             total=total
         )
         
-        assert isinstance(order, Entity)
-        assert isinstance(order.id, uuid.UUID)
-        assert str(order.customer_id) == str(customer_id)
-        assert order.total == total
-        assert isinstance(order.created_at, datetime)
-        assert isinstance(order.updated_at, datetime)
-        assert order.deleted_at is None
-        assert order.is_deleted is False
+        assert result.success is True
+        assert isinstance(result.value, Order)
+        assert isinstance(result.value.id, uuid.UUID)
+        assert str(result.value.customer_id) == str(customer_id)
+        assert result.value.total == total
+        assert isinstance(result.value.created_at, datetime)
+        assert isinstance(result.value.updated_at, datetime)
+        assert result.value.deleted_at is None
+        assert result.value.is_deleted is False
 
+    def test_create_order_with_empty_total(self, valid_customer):
+        customer_id = valid_customer.id
+        non_numeric_values = [
+            None,
+            ""
+        ]
+    
+        for value in non_numeric_values:
+            result = Order.create(customer_id=str(customer_id), total=value)
+            assert result.failure is True
+            assert len(result.errors) == 1
+            assert result.errors[0] == RequiredError("total")
+            
     def test_create_order_with_invalid_total(self, valid_customer):
         customer_id = valid_customer.id
         non_numeric_values = [
             "abc",
-            None,
-            "",
             [],
             {}
         ]
     
         for value in non_numeric_values:
-            with pytest.raises(TypeError) as excinfo:
-                Order.create(customer_id=customer_id, total=value)
-            assert "Order total must be a number" in str(excinfo.value)
+            result = Order.create(customer_id=str(customer_id), total=value)
+            assert result.failure is True
+            assert len(result.errors) == 1
+            assert result.errors[0] == CurrencyError("total", value)
 
     def test_create_order_with_negative_or_zero_total(self, valid_customer):
         customer_id = valid_customer.id
@@ -53,21 +66,29 @@ class TestOrder:
         ]
         
         for value in invalid_values:
-            with pytest.raises(ValueError) as excinfo:
-                Order.create(customer_id=customer_id, total=value)
-            assert "Order total must be greater than zero" in str(excinfo.value)
+            result = Order.create(customer_id=str(customer_id), total=value)
+            assert result.failure is True
+            assert len(result.errors) == 1
+            assert result.errors[0] == CurrencyError("total", value)
+
+    def test_create_order_with_empty_customer_id(self):
+        result = Order.create(customer_id="", total=100.50)
+        assert result.failure is True
+        assert len(result.errors) == 1
+        assert result.errors[0] == RequiredError("customer_id")
 
     def test_create_order_with_invalid_customer_id(self):
-        with pytest.raises(TypeError) as excinfo:
-            Order.create(customer_id="invalid_customer_id", total=100.50)
-        assert "Customer ID must be a valid UUID" in str(excinfo.value)
+        result = Order.create(customer_id="invalid_customer_id", total=100.50)
+        assert result.failure is True
+        assert len(result.errors) == 1
+        assert result.errors[0] == UUIDFormatError("customer_id", "invalid_customer_id")
 
     def test_update_order_total(self, valid_customer):
         
         order = Order.create(
             customer_id=str(valid_customer.id),
             total=100.0
-        )
+        ).value
         original_updated_at = order.updated_at
         
         import time
@@ -79,29 +100,44 @@ class TestOrder:
         assert order.updated_at > original_updated_at
         assert str(order.customer_id) == str(valid_customer.id)
     
+    def test_update_order_with_empty_total(self, valid_customer):
+        order = Order.create(
+            customer_id=str(valid_customer.id),
+            total=100.0
+        ).value
+        non_numeric_values = [
+            None,
+            "",
+        ]
+
+        for value in non_numeric_values:
+            result = order.update_total(value)
+            assert result.failure is True
+            assert len(result.errors) == 1
+            assert result.errors[0] == RequiredError("total")
+
     def test_update_order_with_invalid_total(self, valid_customer):
         order = Order.create(
             customer_id=str(valid_customer.id),
             total=100.0
-        )
+        ).value
         non_numeric_values = [
             "abc",
-            None,
-            "",
             [],
             {}
         ]
 
         for value in non_numeric_values:
-            with pytest.raises(TypeError) as excinfo:
-                order.update_total(value)
-            assert "Order total must be a number" in str(excinfo.value)
+            result = order.update_total(value)
+            assert result.failure is True
+            assert len(result.errors) == 1
+            assert result.errors[0] == CurrencyError("total", value)
 
     def test_update_order_with_negative_or_zero_total(self, valid_customer):
         order = Order.create(
             customer_id=str(valid_customer.id),
             total=100.0
-        )
+        ).value
         
         invalid_values = [
             -100.50,
@@ -110,9 +146,10 @@ class TestOrder:
         ]
         
         for value in invalid_values:
-            with pytest.raises(ValueError) as excinfo:
-                order.update_total(value)
-            assert "Order total must be greater than zero" in str(excinfo.value)
+            result = order.update_total(value)
+            assert result.failure is True
+            assert len(result.errors) == 1
+            assert result.errors[0] == CurrencyError("total", value)
             assert order.total == 100.0
     
     def test_load_existing_order(self, valid_customer):
@@ -130,7 +167,7 @@ class TestOrder:
             created_at=created_at,
             updated_at=updated_at,
             deleted_at=deleted_at
-        )
+        ).value
         
         assert str(order.id) == str(order_id)
         assert str(order.customer_id) == str(customer_id)
@@ -144,7 +181,7 @@ class TestOrder:
         order = Order.create(
             customer_id=str(valid_customer.id),
             total=100.0
-        )
+        ).value
         assert order.is_deleted is False
         assert order.deleted_at is None
 
@@ -161,11 +198,13 @@ class TestOrder:
         customer_id = valid_customer.id
         total = 150.75
         
-        order = Order(
-            id=order_id,
+        order = Order.load(
+            id=str(order_id),
             customer_id=str(customer_id),
-            total=total
-        )
+            total=total,
+            created_at=datetime.now(),
+            updated_at=datetime.now(),
+        ).value
         
         result = order.to_dict()
         
@@ -186,7 +225,7 @@ class TestOrder:
             "deleted_at": datetime.now()
         }
         
-        order = Order.from_dict(data)
+        order = Order.from_dict(data).value
         
         assert str(order.id) == str(data["id"])
         assert str(order.customer_id) == str(data["customer_id"])

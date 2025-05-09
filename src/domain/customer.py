@@ -1,8 +1,10 @@
 import uuid
 from datetime import datetime
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List
 
-from src.domain.entity import Entity
+from src.domain.core import Entity, Result
+from src.domain.validation import Validator
+from src.domain.errors import ValidationError
 
 class Customer(Entity):
 
@@ -26,21 +28,34 @@ class Customer(Entity):
         cls,
         name: str,
         email: str
-    ) -> "Customer":
-        cls.validate(name, email)
-        return cls(
+    ) -> Result["Customer"]:
+        result = cls.validate(name, email)
+        if result.failure:
+            return Result.fail(result.errors)
+        
+        return Result.ok(cls(
             name=name,
             email=email
-        )
+        ))
     
     @staticmethod
-    def validate(name, email) -> None:
-        if not name or name.strip() == "":
-            raise ValueError("Name cannot be empty")
-        if len(name.strip()) < Customer.MIN_NAME_LENGTH:
-            raise ValueError("Name must have at least 3 characters")
-        if not email or "@" not in email:
-            raise ValueError("Invalid email format")
+    def validate(name, email) -> Result[List[ValidationError] | None]:      
+        validator = Validator()
+        
+        validator.field(name, "name") \
+            .required() \
+            .min_length(3)
+            
+        validator.field(email, "email") \
+            .required() \
+            .email()
+        
+        result = validator.validate()
+
+        if result.failure:
+            return Result.fail(result.errors)
+        
+        return Result.ok()
 
     @classmethod
     def load(
@@ -51,31 +66,45 @@ class Customer(Entity):
         created_at: datetime,
         updated_at: datetime,
         deleted_at: datetime | None = None,
-    ) -> "Customer":
-        return cls(
+    ) -> Result["Customer"]:
+        return Result.ok(cls(
             id=uuid.UUID(id),
             name=name,
             email=email,
             created_at=created_at,
             updated_at=updated_at,
             deleted_at=deleted_at
-        )
+        ))
     
-    def update(self, name: str | None = None, email: str | None = None) -> None:
-        self.validate_on_update(name, email)
+    def update(self, name: str | None = None, email: str | None = None) -> Result[None]:
+        result = self.validate_on_update(name, email)
+        if result.failure:
+            return Result.fail(result.errors)
+        
         if name:
             self.name = name
         if email:
             self.email = email
         super().update()
+        
+        return Result.ok()
 
-    def validate_on_update(self, name: str | None = None, email: str | None = None) -> None:
+    def validate_on_update(self, name: str | None = None, email: str | None = None) -> Result[List[ValidationError] | None]:  
+        validator = Validator()
+        
         if name:
-            if len(name.strip()) < Customer.MIN_NAME_LENGTH:
-                raise ValueError("Name must have at least 3 characters")
+            validator.field(name, "name") \
+                .min_length(3)
+                
         if email:
-            if "@" not in email:
-                raise ValueError("Invalid email format")
+            validator.field(email, "email") \
+                .email()
+                
+        result = validator.validate()
+
+        if result.failure:
+            return Result.fail(result.errors)
+        return Result.ok()
             
     def to_dict(self) -> Dict[str, Any]:
         result = super().to_dict()
@@ -86,7 +115,7 @@ class Customer(Entity):
         return result
     
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "Customer":
+    def from_dict(cls, data: Dict[str, Any]) -> Result["Customer"]:
         return cls.load(
             id=data.get("id"),
             name=data.get("name"),

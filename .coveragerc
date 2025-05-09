@@ -1,0 +1,14 @@
+[run]
+source = src/
+omit = tests/*
+
+[report]
+exclude_lines =
+    # Ignorar linhas com decorador abstractmethod
+    @abstractmethod
+    # Ignorar pass em classes abstratas
+    pass
+    # Outros padrões comuns a ignorar
+    pragma: no cover
+    def __repr__
+    raise NotImplementedError

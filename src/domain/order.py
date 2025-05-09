@@ -1,8 +1,12 @@
 import uuid
 from datetime import datetime
-from typing import Any, Dict, Optional
+from typing import List, Any, Dict, Optional
 
-from src.domain.entity import Entity
+from src.domain.core import Entity, Result
+from src.domain.validation import Validator
+from src.domain.errors import ValidationError
+
+
 
 class Order(Entity):
     def __init__(
@@ -19,35 +23,60 @@ class Order(Entity):
         super().__init__(id, created_at, updated_at, deleted_at)
 
     @classmethod
-    def create(cls, customer_id: str, total: float) -> "Order":
-        cls.validate(total, customer_id)
-        return cls(customer_id, total)
+    def create(cls, customer_id: str, total: float) -> Result["Order"]:
+        result = cls.validate(total, customer_id)
+
+        if result.failure:
+            return Result.fail(result.errors)
+        
+        return Result.ok(cls(customer_id, total))
     
     @staticmethod
-    def validate(total, customer_id) -> None:
-        if not isinstance(total, (int, float)):
-            raise TypeError("Order total must be a number")
-        if total <= 0:
-            raise ValueError("Order total must be greater than zero")
-        try:
-            uuid.UUID(customer_id)
-        except (ValueError, TypeError):
-            raise TypeError("Customer ID must be a valid UUID")
+    def validate(total, customer_id) -> Result[List[ValidationError] | None]:
+        validator = Validator()
+        
+        validator.field(total, "total") \
+            .required() \
+            .currency()
+            
+        validator.field(customer_id, "customer_id") \
+            .required() \
+            .uuid()
+        
+        result = validator.validate()
+
+        if result.failure:
+            return Result.fail(result.errors)
+        
+        return Result.ok()
         
     @classmethod
-    def load(cls, id: str, customer_id: str, total: float, created_at: datetime, updated_at: datetime, deleted_at: Optional[datetime] = None) -> "Order":
-        return cls(id=uuid.UUID(id), customer_id=uuid.UUID(customer_id), total=total, created_at=created_at, updated_at=updated_at, deleted_at=deleted_at)  
+    def load(cls, id: str, customer_id: str, total: float, created_at: datetime, updated_at: datetime, deleted_at: Optional[datetime] = None) -> Result["Order"]:
+        return Result.ok(cls(id=uuid.UUID(id), customer_id=uuid.UUID(customer_id), total=total, created_at=created_at, updated_at=updated_at, deleted_at=deleted_at))  
     
-    def update_total(self, total: float) -> None:
-        self.validate_total(total)
+    def update_total(self, total: float) -> Result[None]:
+        result = self.validate_total(total)
+        if result.failure:
+            return Result.fail(result.errors)
+        
         self.total = total
         super().update()
+        
+        return Result.ok()
     
-    def validate_total(self, total) -> None:
-        if not isinstance(total, (int, float)):
-            raise TypeError("Order total must be a number")
-        if total <= 0:
-            raise ValueError("Order total must be greater than zero")
+    def validate_total(self, total) -> Result[List[ValidationError] | None]:
+        validator = Validator()
+        
+        validator.field(total, "total") \
+            .required() \
+            .currency()
+        
+        result = validator.validate()
+        
+        if result.failure:
+            return Result.fail(result.errors)
+        
+        return Result.ok()
 
     def to_dict(self) -> dict:
         result = super().to_dict()
@@ -58,7 +87,7 @@ class Order(Entity):
         return result
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "Order":
+    def from_dict(cls, data: Dict[str, Any]) -> Result["Order"]:
         return cls.load(
             id=data.get("id"),
             customer_id=data.get("customer_id"),
