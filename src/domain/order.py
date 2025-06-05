@@ -33,8 +33,10 @@ class Order(Entity):
     def validate(total, customer_id) -> Result[List[ValidationError] | None]:
         validator = Validator()
         
-        Order._validate_total(validator, total)
-            
+        validator.field(total, "total") \
+        .required() \
+        .currency()
+        
         validator.field(customer_id, "customer_id") \
             .required() \
             .uuid()
@@ -46,35 +48,17 @@ class Order(Entity):
         
         return Result.ok()
 
-    @staticmethod
-    def _validate_total(validator: Validator, total) -> None:
-        validator.field(total, "total") \
-        .required() \
-        .currency()
-        
     @classmethod
     def load(cls, id: str, customer_id: str, total: float, created_at: datetime, updated_at: datetime, deleted_at: Optional[datetime] = None) -> Result["Order"]:
         return Result.ok(cls(id=uuid.UUID(id), customer_id=uuid.UUID(customer_id), total=total, created_at=created_at, updated_at=updated_at, deleted_at=deleted_at))  
     
     def update_total(self, total: float) -> Result[None]:
-        result = self.validate_total(total)
+        result = self.validate(total, self.customer_id)
         if result.failure:
             return Result.fail(result.errors)
         
         self.total = total
         super().update()
-        
-        return Result.ok()
-    
-    def validate_total(self, total) -> Result[List[ValidationError] | None]:
-        validator = Validator()
-        
-        Order._validate_total(validator, total)
-        
-        result = validator.validate()
-        
-        if result.failure:
-            return Result.fail(result.errors)
         
         return Result.ok()
 
