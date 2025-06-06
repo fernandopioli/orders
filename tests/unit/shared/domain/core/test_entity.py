@@ -4,7 +4,7 @@ from datetime import datetime
 
 import pytest
 
-from src.shared.domain.core.entity import Entity
+from src.shared.domain.core import Entity
 
 class ConcreteEntity(Entity):
     def validate(self) -> None:

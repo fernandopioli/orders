@@ -2,8 +2,7 @@ import uuid
 from datetime import datetime
 from typing import Any, Dict, List
 
-from src.shared.domain.core import Result
-from src.shared.domain.core.entity import Entity
+from src.shared.domain.core import Result, Entity
 from src.shared.domain.validation import Validator
 from src.shared.domain.errors import ValidationError
 

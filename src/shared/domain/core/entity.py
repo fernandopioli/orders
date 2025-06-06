@@ -1,8 +1,7 @@
 import uuid
 from abc import ABC, abstractmethod
 from datetime import datetime
-from typing import Any, Dict, Type, TypeVar, List
-
+from typing import Any, Dict, Type, TypeVar
 
 T = TypeVar('T', bound='Entity')
 

@@ -2,9 +2,8 @@ import pytest
 import uuid
 from datetime import datetime
 
-from src.shared.domain.events.domain_event import DomainEvent
-from src.shared.domain.core.entity import Entity
-from src.shared.domain.core.aggregate import Aggregate
+from src.shared.domain.events import DomainEvent
+from src.shared.domain.core import Entity, Aggregate
 
 
 class ConcreteAggregate(Aggregate):

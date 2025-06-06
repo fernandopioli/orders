@@ -1,7 +1,6 @@
 from datetime import datetime
 from src.shared.domain.core import Result
-from src.shared.domain.events.domain_event import DomainEvent
-from src.shared.domain.events.event_publisher import EventPublisher
+from src.shared.domain.events import DomainEvent, EventPublisher
 
 
 class ConsoleEventPublisher(EventPublisher):

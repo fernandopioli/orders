@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 
 from src.order.domain import Customer
 from src.shared.domain.errors import RequiredError, MinLengthError, EmailError
-from src.shared.domain.core.entity import Entity
+from src.shared.domain.core import Entity
 
 class TestCustomer:
 

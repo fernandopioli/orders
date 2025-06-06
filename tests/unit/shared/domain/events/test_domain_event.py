@@ -3,8 +3,8 @@ import pytest
 from datetime import datetime
 from abc import ABC
 
-from src.shared.domain.events.domain_event import DomainEvent
-from src.shared.domain.core.entity import Entity
+from src.shared.domain.events import DomainEvent
+from src.shared.domain.core import Entity
 
 class ConcreteDomainEventImpl(DomainEvent):
     def __init__(self, entity: Entity):

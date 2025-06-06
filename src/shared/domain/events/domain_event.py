@@ -3,7 +3,7 @@ from datetime import datetime
 from typing import Dict, Any, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from src.shared.domain.core.aggregate import Aggregate
+    from src.shared.domain.core import Aggregate
 
 class DomainEvent(ABC):
     def __init__(self, entity: "Aggregate"):

@@ -2,11 +2,10 @@ import uuid
 from datetime import datetime
 from typing import List, Any, Dict, Optional
 
-from src.shared.domain.core.aggregate import Aggregate
-from src.shared.domain.core import Result
+from src.shared.domain.core import Aggregate, Result
 from src.shared.domain.validation import Validator
 from src.shared.domain.errors import ValidationError
-from src.order.domain.order_created_event import OrderCreatedEvent
+from src.order.domain.events import OrderCreatedEvent
 
 class Order(Aggregate):
     def __init__(

@@ -1,7 +1,6 @@
 import pytest
 
-from src.shared.domain.validation import Validator
-from src.shared.domain.validation.field_validator import FieldValidator
+from src.shared.domain.validation import Validator, FieldValidator
 
 class TestValidator:
     def test_validate_all_fields_valid(self):

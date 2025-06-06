@@ -1,7 +1,6 @@
 import pytest
 
-from src.shared.domain.validation import ValidationContext
-from src.shared.domain.validation.field_validator import FieldValidator
+from src.shared.domain.validation import ValidationContext, FieldValidator
 from src.shared.domain.errors import RequiredError, MinLengthError, EmailError, CurrencyError, UUIDFormatError
 
 class TestFieldValidator:

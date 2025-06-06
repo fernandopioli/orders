@@ -2,10 +2,9 @@ import pytest
 import uuid
 from datetime import datetime, timedelta
 
-from src.order.domain.order import Order
-from src.order.domain.customer import Customer
+from src.order.domain import Order, Customer
 from src.shared.domain.errors import CurrencyError, RequiredError, UUIDFormatError
-from src.shared.domain.core.aggregate import Aggregate
+from src.shared.domain.core import Aggregate
 
 class TestOrder:
     @pytest.fixture

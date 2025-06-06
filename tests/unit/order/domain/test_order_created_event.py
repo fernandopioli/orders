@@ -1,11 +1,10 @@
 import pytest
 import uuid
 from datetime import datetime
-from abc import ABC
 
 from src.order.domain.order import Order
-from src.order.domain.order_created_event import OrderCreatedEvent
-from src.shared.domain.events.domain_event import DomainEvent
+from src.order.domain.events import OrderCreatedEvent
+from src.shared.domain.events import DomainEvent
 
 
 class TestOrderCreatedEvent:

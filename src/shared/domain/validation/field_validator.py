@@ -1,6 +1,7 @@
 from typing import Any, List
 
-from src.shared.domain.validation import ValidationContext, ValidationRule
+from src.shared.domain.validation.validation_context import ValidationContext
+from src.shared.domain.validation.validation_rule import ValidationRule
 from src.shared.domain.validation.rules import RequiredRule, MinLengthRule, EmailRule, UUIDRule, CurrencyRule
 
 class FieldValidator:

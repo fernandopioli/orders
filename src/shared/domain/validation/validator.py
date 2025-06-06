@@ -1,6 +1,6 @@
 from typing import Any, List
 
-from src.shared.domain.core.result import Result
+from src.shared.domain.core import Result
 from src.shared.domain.validation.validation_context import ValidationContext
 from src.shared.domain.validation.field_validator import FieldValidator
 

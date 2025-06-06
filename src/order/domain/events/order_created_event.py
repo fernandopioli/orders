@@ -1,5 +1,5 @@
 from typing import TYPE_CHECKING
-from src.shared.domain.events.domain_event import DomainEvent
+from src.shared.domain.events import DomainEvent
 
 if TYPE_CHECKING:
     from src.order.domain.order import Order

@@ -1,9 +1,11 @@
 import uuid
 from datetime import datetime
-from typing import List
+from typing import List, TYPE_CHECKING
 
-from src.shared.domain.events.domain_event import DomainEvent
 from src.shared.domain.core.entity import Entity
+
+if TYPE_CHECKING:
+    from src.shared.domain.events import DomainEvent
 
 
 class Aggregate(Entity):
