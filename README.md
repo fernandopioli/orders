@@ -30,6 +30,17 @@ poetry run python -m pytest --cov=src --cov-report=term-missing
 
 poetry env info --path
 
+- DDD
+- Clean Arch
+- SOLID
+- Automated tests
+- Design patterns utilizados
+    - Factory
+    - Repository
+    - Builder no validation
+    - Mediator/Observer -> Monta notificacao assim que order é criada
+
 ## TODO
 - Improve email validation
-- Create a validator class
+- 04/06
+    - Fazer mediator/observer para ver evento de nova order, buscar nome do usuario na api de users e publicar evento no kafka

@@ -12,3 +12,5 @@ exclude_lines =
     pragma: no cover
     def __repr__
     raise NotImplementedError
+    # Ignorar TYPE_CHECKING imports (apenas para type hints)
+    if TYPE_CHECKING:
