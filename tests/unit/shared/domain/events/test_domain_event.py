@@ -44,48 +44,29 @@ class TestDomainEvent:
         with pytest.raises(TypeError):
             DomainEvent()
     
-    def test_domain_event_creation_with_data(self, entity_for_event):
+    def test_domain_event_creation(self, entity_for_event):
         event = ConcreteDomainEventImpl(entity_for_event)
         
-        assert event.event_data == entity_for_event
-        assert isinstance(event.occurred_on, datetime)
-    
-    def test_domain_event_creation_without_data(self, entity_for_event):
-        event = ConcreteDomainEventImpl(entity_for_event)
-        
-        assert event.event_data == entity_for_event
-        assert isinstance(event.occurred_on, datetime)
-    
-    def test_domain_event_creation_with_none_data(self, entity_for_event):
-        event = ConcreteDomainEventImpl(entity_for_event)
-        
-        assert event.event_data == entity_for_event
-        assert isinstance(event.occurred_on, datetime)
-    
-    def test_event_type_property(self, entity_for_event):
-        event = ConcreteDomainEventImpl(entity_for_event)
-        
+        assert isinstance(uuid.UUID(event.event_id), uuid.UUID)
         assert event.event_type == "ConcreteDomainEventImpl"
+        assert event.aggregate_id == entity_for_event.id
+        assert event.event_data == entity_for_event
+        assert isinstance(event.occurred_on, datetime)
+        assert event.version == 1
     
     def test_to_dict_serialization(self, entity_for_event):
         event = ConcreteDomainEventImpl(entity_for_event)
         
         result = event.to_dict()
         
-        expected_keys = {"event_type", "occurred_on", "event_data"}
+        expected_keys = {"event_type", "occurred_on", "event_data", "aggregate_id", "event_id", "version"}
         assert set(result.keys()) == expected_keys
+        assert result["event_id"] == event.event_id
+        assert result["aggregate_id"] == entity_for_event.id
         assert result["event_type"] == "ConcreteDomainEventImpl"
         assert result["event_data"] == entity_for_event.to_dict()
         assert isinstance(result["occurred_on"], str)
-    
-    def test_to_dict_with_empty_data(self, entity_for_event):
-        event = ConcreteDomainEventImpl(entity_for_event)
-        
-        result = event.to_dict()
-        
-        assert result["event_type"] == "ConcreteDomainEventImpl"
-        assert result["event_data"] == entity_for_event.to_dict()
-        assert isinstance(result["occurred_on"], str)
+        assert result["version"] == 1
     
     def test_occurred_on_is_iso_format_in_dict(self, entity_for_event):
         event = ConcreteDomainEventImpl(entity_for_event)
