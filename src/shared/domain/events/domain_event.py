@@ -22,7 +22,7 @@ class DomainEvent(ABC):
         return {
             "event_id": self.event_id,
             "event_type": self.event_type,
-            "aggregate_id": self.aggregate_id,
+            "aggregate_id": str(self.aggregate_id),
             "event_data": self.event_data.to_dict(),
             "occurred_on": self.occurred_on.isoformat(),
             "version": self.version

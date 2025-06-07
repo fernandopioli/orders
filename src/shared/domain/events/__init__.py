@@ -1,5 +1,5 @@
 from src.shared.domain.events.domain_event import DomainEvent
-from src.shared.domain.events.event_publisher import EventPublisher
-from src.shared.domain.events.event_dispatcher import EventDispatcher
+from src.shared.domain.events.domain_event_handler import DomainEventHandler
+from src.shared.domain.events.domain_event_publisher import DomainEventPublisher
 
-__all__ = ["DomainEvent", "EventPublisher", "EventDispatcher"]
+__all__ = ["DomainEvent", "DomainEventHandler", "DomainEventPublisher"]

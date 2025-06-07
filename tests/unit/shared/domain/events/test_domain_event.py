@@ -62,7 +62,7 @@ class TestDomainEvent:
         expected_keys = {"event_type", "occurred_on", "event_data", "aggregate_id", "event_id", "version"}
         assert set(result.keys()) == expected_keys
         assert result["event_id"] == event.event_id
-        assert result["aggregate_id"] == entity_for_event.id
+        assert result["aggregate_id"] == str(entity_for_event.id)
         assert result["event_type"] == "ConcreteDomainEventImpl"
         assert result["event_data"] == entity_for_event.to_dict()
         assert isinstance(result["occurred_on"], str)
