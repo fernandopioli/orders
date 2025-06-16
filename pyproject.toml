@@ -11,19 +11,28 @@ dependencies = [
     "django (>=5.2.2,<6.0.0)",
     "djangorestframework (>=3.16.0,<4.0.0)"
 ]
-
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src*"]
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
 
+
+[tool.poetry]
+packages = [{include = "src"}]
+
 [tool.poetry.group.dev.dependencies]
-pytest = "^8.3.5"
 black = "^25.1.0"
 ruff = "^0.9.10"
-pytest-cov = "^6.0.0"
 django-extensions = "^4.1"
 django-debug-toolbar = "^5.2.0"
+
+[tool.poetry.group.test.dependencies]
+pytest = "^8.3.5"
+pytest-cov = "^6.0.0"
+pytest-django = "^4.5.0"
 
 [tool.black]
 line-length = 88
@@ -35,5 +44,7 @@ target-version = "py312"
 select = ["E", "F", "I"] 
 
 [tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "web.config.settings"
 testpaths = ["tests"]
 python_files = "test_*.py"
+addopts = ["--cov=src", "--cov-config=.coveragerc", "--verbose"]
