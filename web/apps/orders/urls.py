@@ -1,8 +1,8 @@
 from django.urls import path
 from . import views
 
-app_name = 'orders'
+app_name = 'order'
 
 urlpatterns = [
-    path('create', views.CreateOrderAPIView.as_view(), name='create'),
+    path('', views.OrderAPIView.as_view(), name='order'),
 ]

@@ -1,62 +1,35 @@
 from rest_framework import status
 from rest_framework.views import APIView
-from rest_framework.response import Response
 
 from web.core.container import container
+from web.core.response_utils import ResponseHelper
 from src.order.application.usecases import CreateOrderUseCase
-from .serializers import (
-    CreateOrderRequestSerializer,
-    OrderResponseSerializer,
-)
+from src.order.application.dtos import CreateOrderInput
 
-
-class CreateOrderAPIView(APIView):
+class OrderAPIView(APIView):
     
     def post(self, request):
-        # 1. Validate request data
-        request_serializer = CreateOrderRequestSerializer(data=request.data)
-        if not request_serializer.is_valid():
-            return self._error_response(
-                message="Validation failed",
-                errors=request_serializer.errors,
+        if not request.data:
+            return ResponseHelper.error(
+                message="Request body is required",
                 status_code=status.HTTP_400_BAD_REQUEST
             )
         
-        # 2. Convert to DTO
-        input_dto = request_serializer.to_dto()
+        input_dto = CreateOrderInput.from_dict(request.data)
         
-        # 3. Execute use case
         use_case = container.resolve(CreateOrderUseCase)
         result = use_case.execute(input_dto)
         
-        # 4. Handle result
         if result.failure:
-            return self._error_response(
+            return ResponseHelper.error(
                 message="Failed to create order",
-                errors=[str(error) for error in result.errors],
-                status_code=status.HTTP_400_BAD_REQUEST
+                errors=[str(error) for error in result.errors]
             )
         
-        # 5. Success response
-        order_data = OrderResponseSerializer(result.value).instance
-        return self._success_response(
+        order_data = result.value.order.to_dict()
+        
+        return ResponseHelper.success(
             data={"order": order_data},
             message="Order created successfully",
             status_code=status.HTTP_201_CREATED
         )
-    
-    def _success_response(self, data=None, message="Success", status_code=status.HTTP_200_OK):
-        response_data = {
-            "success": True,
-            "data": data,
-            "message": message
-        }
-        return Response(response_data, status=status_code)
-    
-    def _error_response(self, message="Error", errors=None, status_code=status.HTTP_400_BAD_REQUEST):
-        response_data = {
-            "success": False,
-            "message": message,
-            "errors": errors or []
-        }
-        return Response(response_data, status=status_code)
