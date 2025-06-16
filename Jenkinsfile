@@ -4,6 +4,7 @@ pipeline {
       image 'python:3.12'
       args '-u root:root'
     }
+  }
 
   environment {
     VENV_PATH = '.venv'
