@@ -7,6 +7,14 @@ agent { docker { image 'python:3.12' } }
   }
 
   stages {
+    stage('Install Python') {
+      steps {
+        sh '''
+          apt-get update
+          apt-get install -y python3
+        '''
+      }
+    }
     stage('Install Poetry') {
       steps {
         sh '''
