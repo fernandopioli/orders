@@ -1,11 +1,40 @@
 pipeline {
   agent any
+
+  environment {
+    VENV_PATH = '.venv'
+    POETRY_HOME = '/usr/local/bin/poetry'
+  }
+
   stages {
-    stage('Test') {
+    stage('Install Poetry') {
       steps {
-        echo "Branch: ${env.BRANCH_NAME}"
-        sh 'echo rodando testes 2'
+        sh '''
+          if ! command -v poetry > /dev/null; then
+            curl -sSL https://install.python-poetry.org | python3 -
+            export PATH="$HOME/.local/bin:$PATH"
+          fi
+        '''
       }
+    }
+    stage('Install dependencies') {
+      steps {
+        sh 'poetry install'
+      }
+    }
+    stage('Run Tests') {
+      steps {
+        sh 'poetry run pytest'
+      }
+    }
+  }
+
+  post {
+    failure {
+      echo 'Pipeline falhou! Corrija os testes.'
+    }
+    success {
+      echo 'Pipeline passou! Tudo certo.'
     }
   }
 }
