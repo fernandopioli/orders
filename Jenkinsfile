@@ -1,5 +1,5 @@
 pipeline {
-agent { docker { image 'python:3.12' } }
+agent any
 
   environment {
     VENV_PATH = '.venv'
