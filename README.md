@@ -38,6 +38,8 @@ poetry run pytest
 - poetry run ruff format --check .
 - poetry run ruff format .
 - poetry run ruff check --fix .
+- poetry run safety scan
+- poetry install --sync
 
 
 - DDD

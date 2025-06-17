@@ -27,7 +27,7 @@ pipeline {
     }
     stage('Install dependencies') {
       steps {
-        sh 'poetry install'
+        sh 'poetry install --without prod'
       }
     }
     stage('Lint & Format') {
@@ -38,7 +38,8 @@ pipeline {
     }
     stage('Run Tests') {
       steps {
-        sh 'poetry run pytest'
+        sh 'poetry run pytest --junitxml=reports/pytest.xml'
+        junit 'reports/pytest.xml'
       }
     }
   }
