@@ -27,7 +27,7 @@ pipeline {
     }
     stage('Install dependencies') {
       steps {
-        sh 'poetry install --without prod'
+        sh 'poetry install'
       }
     }
     stage('Lint & Format') {
