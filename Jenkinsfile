@@ -30,6 +30,12 @@ pipeline {
         sh 'poetry install'
       }
     }
+    stage('Lint & Format') {
+      steps {
+        sh 'poetry run ruff check --fix .'
+        sh 'poetry run ruff format .'
+      }
+    }
     stage('Run Tests') {
       steps {
         sh 'poetry run pytest'
