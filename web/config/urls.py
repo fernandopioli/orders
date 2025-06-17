@@ -1,5 +1,6 @@
-from django.urls import include, path, re_path
 from django.http import JsonResponse
+from django.urls import include, path, re_path
+
 
 def api_404(request, *args):
     return JsonResponse({
