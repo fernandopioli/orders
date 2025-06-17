@@ -9,6 +9,7 @@ pipeline {
   environment {
     VENV_PATH = '.venv'
     POETRY_HOME = '/usr/local/bin/poetry'
+    DJANGO_SETTINGS_MODULE = "web.config.settings.${env.BRANCH_NAME == 'main' ? 'production' : env.BRANCH_NAME}"
   }
 
   stages {
