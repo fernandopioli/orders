@@ -32,6 +32,7 @@ poetry run pytest
 # Comands
 - poetry add --dev black
 - poetry env info --path
+- poetry run which python
 - poetry run python manage.py runserver
 - poetry run pytest
 - poetry run ruff format --check .
