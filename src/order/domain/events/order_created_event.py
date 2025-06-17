@@ -1,4 +1,5 @@
 from typing import TYPE_CHECKING
+
 from src.shared.domain.events import DomainEvent
 
 if TYPE_CHECKING:
@@ -8,6 +9,6 @@ if TYPE_CHECKING:
 class OrderCreatedEvent(DomainEvent):
     def __init__(self, order: "Order"):
         super().__init__(order)
-    
+
     def __repr__(self) -> str:
         return f"OrderCreatedEvent(id={self.event_data.id})"

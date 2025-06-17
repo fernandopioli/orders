@@ -1,30 +1,32 @@
-import pytest
 import uuid
 from datetime import datetime
 
+import pytest
+
+from src.shared.domain.core import Aggregate, Entity
 from src.shared.domain.events import DomainEvent
-from src.shared.domain.core import Entity, Aggregate
 
 
 class ConcreteAggregate(Aggregate):
-            def __repr__(self) -> str:
-                return f"ConcreteAggregate(id={self.id})"
-            
-            def validate(self) -> None:
-                pass
-            
-            def to_dict(self) -> dict:
-                return super().to_dict()
-            
-            @classmethod
-            def from_dict(cls, data: dict) -> "ConcreteAggregate":
-                return cls(
-                    id=uuid.UUID(data["id"]),
-                    created_at=datetime.fromisoformat(data["created_at"]),
-                    updated_at=datetime.fromisoformat(data["updated_at"]),
-                    deleted_at=datetime.fromisoformat(data["deleted_at"]),
-                )
-            
+    def __repr__(self) -> str:
+        return f"ConcreteAggregate(id={self.id})"
+
+    def validate(self) -> None:
+        pass
+
+    def to_dict(self) -> dict:
+        return super().to_dict()
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "ConcreteAggregate":
+        return cls(
+            id=uuid.UUID(data["id"]),
+            created_at=datetime.fromisoformat(data["created_at"]),
+            updated_at=datetime.fromisoformat(data["updated_at"]),
+            deleted_at=datetime.fromisoformat(data["deleted_at"]),
+        )
+
+
 class ConcreteEventForTesting(DomainEvent):
     def __init__(self, aggregate: Aggregate):
         super().__init__(aggregate)
@@ -32,16 +34,16 @@ class ConcreteEventForTesting(DomainEvent):
     def __repr__(self) -> str:
         return f"ConcreteEventForTesting(aggregate_id={self.event_data.id})"
 
-class TestAggregate:
 
+class TestAggregate:
     @pytest.fixture
     def concrete_aggregate(self):
         return ConcreteAggregate()
-    
+
     @pytest.fixture
     def concrete_event(self, concrete_aggregate):
         return ConcreteEventForTesting(concrete_aggregate)
-    
+
     def test_aggregate_is_abstract(self):
         with pytest.raises(TypeError):
             Aggregate()
@@ -77,7 +79,7 @@ class TestAggregate:
 
     def test_aggregate_starts_with_empty_events_list(self, concrete_aggregate):
         events = concrete_aggregate.get_events()
-        
+
         assert isinstance(events, list)
         assert len(events) == 0
 
@@ -93,13 +95,13 @@ class TestAggregate:
         event1 = ConcreteEventForTesting(concrete_aggregate)
         event2 = ConcreteEventForTesting(concrete_aggregate)
         event3 = ConcreteEventForTesting(concrete_aggregate)
-        
+
         concrete_aggregate.add_domain_event(event1)
         concrete_aggregate.add_domain_event(event2)
         concrete_aggregate.add_domain_event(event3)
-        
+
         events = concrete_aggregate.get_events()
-        
+
         assert len(events) == 3
         assert events[0] == event1
         assert events[1] == event2
@@ -107,10 +109,10 @@ class TestAggregate:
 
     def test_get_events_returns_list(self, concrete_aggregate, concrete_event):
         concrete_aggregate.add_domain_event(concrete_event)
-        
+
         events1 = concrete_aggregate.get_events()
         events2 = concrete_aggregate.get_events()
-        
+
         assert events1 == events2
         assert len(events1) == 1
         assert len(events2) == 1
@@ -120,23 +122,20 @@ class TestAggregate:
     def test_clear__all_events(self, concrete_aggregate):
         event1 = ConcreteEventForTesting(concrete_aggregate)
         event2 = ConcreteEventForTesting(concrete_aggregate)
-        
+
         concrete_aggregate.add_domain_event(event1)
         concrete_aggregate.add_domain_event(event2)
-        
+
         assert len(concrete_aggregate.get_events()) == 2
-        
+
         concrete_aggregate.clear_events()
-        
+
         events = concrete_aggregate.get_events()
         assert len(events) == 0
 
     def test_clear_events_on_empty_list(self, concrete_aggregate):
         assert len(concrete_aggregate.get_events()) == 0
-        
+
         concrete_aggregate.clear_events()
-        
+
         assert len(concrete_aggregate.get_events()) == 0
-
-
-

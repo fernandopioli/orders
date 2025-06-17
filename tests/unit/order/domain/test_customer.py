@@ -1,13 +1,12 @@
-import pytest
 import uuid
 from datetime import datetime, timedelta
 
 from src.order.domain import Customer
-from src.shared.domain.errors import RequiredError, MinLengthError, EmailError
 from src.shared.domain.core import Entity
+from src.shared.domain.errors import EmailError, MinLengthError, RequiredError
+
 
 class TestCustomer:
-
     def test_customer_is_an_entity(self):
         assert issubclass(Customer, Entity)
 
@@ -35,6 +34,7 @@ class TestCustomer:
 
         assert result.failure is True
         assert len(result.errors) == 1
+
         assert result.errors[0] == RequiredError("name")
 
     def test_customer_with_less_than_3_chars(self):
@@ -93,7 +93,6 @@ class TestCustomer:
         assert customer.email == "new@mail.com"
 
     def test_validate_name_on_update_method(self):
-
         customer = Customer.create(name="original_name", email="original@mail.com").value
 
         result = customer.update(name="ab", email="new@mail.com")
@@ -103,7 +102,6 @@ class TestCustomer:
         assert result.errors[0] == MinLengthError("name", 3, "ab")
 
     def test_validate_email_on_update_method(self):
-
         customer = Customer.create(name="original_name", email="original@mail.com").value
 
         result = customer.update(name="new_name", email="invalid-email")
@@ -117,16 +115,16 @@ class TestCustomer:
         created_at = datetime.now() - timedelta(days=5)
         updated_at = datetime.now() - timedelta(days=2)
         deleted_at = datetime.now() - timedelta(days=1)
-        
+
         result = Customer.load(
             id=str(customer_id),
             name="any_name",
             email="any_email@mail.com",
             created_at=created_at,
             updated_at=updated_at,
-            deleted_at=deleted_at
+            deleted_at=deleted_at,
         )
-        
+
         assert result.success is True
         assert isinstance(result.value, Customer)
         assert result.value.id == customer_id
@@ -138,18 +136,15 @@ class TestCustomer:
         assert result.value.is_deleted is True
 
     def test_customer_soft_delete(self):
-        customer = Customer.create(
-            name="any_name",
-            email="any_email@mail.com"
-        ).value
+        customer = Customer.create(name="any_name", email="any_email@mail.com").value
         assert customer.is_deleted is False
         assert customer.deleted_at is None
-        
+
         customer.delete()
-        
+
         assert customer.is_deleted is True
         assert isinstance(customer.deleted_at, datetime)
-        
+
         assert customer.name == "any_name"
         assert customer.email == "any_email@mail.com"
 
@@ -157,15 +152,15 @@ class TestCustomer:
         customer_id = uuid.uuid4()
         customer = Customer.load(
             id=str(customer_id),
-            name="any_name", 
+            name="any_name",
             email="any_email@mail.com",
             created_at=datetime.now(),
             updated_at=datetime.now(),
-            deleted_at=datetime.now()
+            deleted_at=datetime.now(),
         ).value
-        
+
         result = customer.to_dict()
-        
+
         assert isinstance(result, dict)
         assert result["id"] == str(customer_id)
         assert result["name"] == "any_name"
@@ -181,11 +176,11 @@ class TestCustomer:
             "email": "any_email@mail.com",
             "created_at": datetime.now(),
             "updated_at": datetime.now(),
-            "deleted_at": datetime.now()
+            "deleted_at": datetime.now(),
         }
-        
+
         result = Customer.from_dict(data)
-        
+
         assert result.success is True
         assert isinstance(result.value, Customer)
         assert result.value.name == "any_name"

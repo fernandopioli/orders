@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime
-from typing import List, TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 
 from src.shared.domain.core.entity import Entity
 
@@ -24,6 +24,6 @@ class Aggregate(Entity):
 
     def get_events(self) -> List["DomainEvent"]:
         return self._domain_events
-    
+
     def clear_events(self) -> None:
         self._domain_events = []

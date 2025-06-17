@@ -3,7 +3,8 @@ from abc import ABC, abstractmethod
 from datetime import datetime
 from typing import Any, Dict, Type, TypeVar
 
-T = TypeVar('T', bound='Entity')
+T = TypeVar("T", bound="Entity")
+
 
 class Entity(ABC):
     def __init__(
@@ -18,7 +19,6 @@ class Entity(ABC):
         self.updated_at = updated_at if updated_at is not None else datetime.now()
         self.deleted_at = deleted_at
         self.is_deleted = True if deleted_at is not None else False
-        
 
     def update(self) -> None:
         self.updated_at = datetime.now()
@@ -48,10 +48,8 @@ class Entity(ABC):
             "updated_at": self.updated_at.isoformat(),
             "deleted_at": self.deleted_at.isoformat() if self.deleted_at else None,
         }
-    
+
     @classmethod
     @abstractmethod
     def from_dict(cls: Type[T], data: Dict[str, Any]) -> T:
         pass
-
-

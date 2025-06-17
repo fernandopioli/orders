@@ -4,8 +4,8 @@ class CreateOrderInput:
         self.total = total
 
     @classmethod
-    def from_dict(cls, data: dict) -> 'CreateOrderInput':
+    def from_dict(cls, data: dict) -> "CreateOrderInput":
         return cls(
-            customer_id=data.get('customer_id') if data.get('customer_id') else None,
-            total=data.get('total') if data.get('total') else None
+            customer_id=data.get("customer_id") if data.get("customer_id") else None,
+            total=data.get("total") if data.get("total") else None,
         )

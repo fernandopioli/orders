@@ -2,12 +2,12 @@ import uuid
 from datetime import datetime
 from typing import Any, Dict, List
 
-from src.shared.domain.core import Result, Entity
-from src.shared.domain.validation import Validator
+from src.shared.domain.core import Entity, Result
 from src.shared.domain.errors import ValidationError
+from src.shared.domain.validation import Validator
+
 
 class Customer(Entity):
-
     MIN_NAME_LENGTH = 3
 
     def __init__(
@@ -24,27 +24,20 @@ class Customer(Entity):
         self.email = email
 
     @classmethod
-    def create(
-        cls,
-        name: str,
-        email: str
-    ) -> Result["Customer"]:
+    def create(cls, name: str, email: str) -> Result["Customer"]:
         result = cls.validate(name, email)
         if result.failure:
             return Result.fail(result.errors)
-        
-        return Result.ok(cls(
-            name=name,
-            email=email
-        ))
-    
+
+        return Result.ok(cls(name=name, email=email))
+
     @staticmethod
-    def validate(name, email, creating: bool = True) -> Result[List[ValidationError] | None]:      
+    def validate(name, email, creating: bool = True) -> Result[List[ValidationError] | None]:
         validator = Validator()
 
         name_validator = validator.field(name, "name")
         email_validator = validator.field(email, "email")
-        
+
         if creating:
             name_validator.required()
             email_validator.required()
@@ -56,7 +49,7 @@ class Customer(Entity):
 
         if result.failure:
             return Result.fail(result.errors)
-        
+
         return Result.ok()
 
     @classmethod
@@ -69,36 +62,35 @@ class Customer(Entity):
         updated_at: datetime,
         deleted_at: datetime | None = None,
     ) -> Result["Customer"]:
-        return Result.ok(cls(
-            id=uuid.UUID(id),
-            name=name,
-            email=email,
-            created_at=created_at,
-            updated_at=updated_at,
-            deleted_at=deleted_at
-        ))
-    
+        return Result.ok(
+            cls(
+                id=uuid.UUID(id),
+                name=name,
+                email=email,
+                created_at=created_at,
+                updated_at=updated_at,
+                deleted_at=deleted_at,
+            )
+        )
+
     def update(self, name: str | None = None, email: str | None = None) -> Result[None]:
         result = Customer.validate(name, email, False)
         if result.failure:
             return Result.fail(result.errors)
-        
+
         if name:
             self.name = name
         if email:
             self.email = email
         super().update()
-        
+
         return Result.ok()
 
     def to_dict(self) -> Dict[str, Any]:
         result = super().to_dict()
-        result.update({
-            "name": self.name,
-            "email": self.email
-        })
+        result.update({"name": self.name, "email": self.email})
         return result
-    
+
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> Result["Customer"]:
         return cls.load(
@@ -107,5 +99,5 @@ class Customer(Entity):
             email=data.get("email"),
             created_at=data.get("created_at"),
             updated_at=data.get("updated_at"),
-            deleted_at=data.get("deleted_at")
+            deleted_at=data.get("deleted_at"),
         )

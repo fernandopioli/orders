@@ -24,8 +24,7 @@ build-backend = "poetry.core.masonry.api"
 packages = [{include = "src"}]
 
 [tool.poetry.group.dev.dependencies]
-black = "^25.1.0"
-ruff = "^0.9.10"
+ruff = "^0.11.13"
 django-extensions = "^4.1"
 django-debug-toolbar = "^5.2.0"
 
@@ -34,14 +33,12 @@ pytest = "^8.3.5"
 pytest-cov = "^6.0.0"
 pytest-django = "^4.5.0"
 
-[tool.black]
-line-length = 88
-target-version = ['py312']
-
 [tool.ruff]
-line-length = 88
-target-version = "py312"
-select = ["E", "F", "I"] 
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+fixable = ["ALL"]
 
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "web.config.settings"

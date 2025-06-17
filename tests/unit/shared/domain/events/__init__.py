@@ -1,1 +1,1 @@
-# Tests for domain events 
+# Tests for domain events

@@ -6,6 +6,7 @@ import pytest
 
 from src.shared.domain.core import Entity
 
+
 class ConcreteEntity(Entity):
     def validate(self) -> None:
         pass
@@ -19,12 +20,9 @@ class ConcreteEntity(Entity):
             id=uuid.UUID(data["id"]),
             created_at=datetime.fromisoformat(data["created_at"]),
             updated_at=datetime.fromisoformat(data["updated_at"]),
-            deleted_at=(
-                datetime.fromisoformat(data["deleted_at"])
-                if data["deleted_at"]
-                else None
-            ),
+            deleted_at=(datetime.fromisoformat(data["deleted_at"]) if data["deleted_at"] else None),
         )
+
 
 @pytest.fixture
 def concrete_entity():
@@ -107,7 +105,7 @@ class TestEntity:
         if entity_dict["deleted_at"] is not None:
             assert isinstance(entity_dict["deleted_at"], str)
             assert entity_dict["deleted_at"] == concrete_entity.deleted_at.isoformat()
-            
+
     def test_from_dict_creates_valid_instance(self, concrete_entity):
         entity_dict = concrete_entity.to_dict()
         new_entity = ConcreteEntity.from_dict(entity_dict)
@@ -132,7 +130,7 @@ class TestEntity:
             concrete_entity.to_dict()
         except Exception as e:
             pytest.fail(f"to_dict() raised an exception: {e}")
-            
+
     def test_from_dict_does_not_raise_exception(self, concrete_entity):
         entity_dict = concrete_entity.to_dict()
         try:

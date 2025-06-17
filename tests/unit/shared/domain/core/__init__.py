@@ -1,1 +1,1 @@
-# Core domain unit tests package 
+# Core domain unit tests package

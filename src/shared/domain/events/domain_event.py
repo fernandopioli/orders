@@ -1,10 +1,11 @@
 import uuid
 from abc import ABC, abstractmethod
 from datetime import datetime
-from typing import Dict, Any, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Dict
 
 if TYPE_CHECKING:
     from src.shared.domain.core import Aggregate
+
 
 class DomainEvent(ABC):
     def __init__(self, aggregate: "Aggregate"):
@@ -13,11 +14,11 @@ class DomainEvent(ABC):
         self.aggregate_id = aggregate.id
         self.event_data = aggregate
         self.version = 1
-    
+
     @property
     def event_type(self) -> str:
         return self.__class__.__name__
-    
+
     def to_dict(self) -> Dict[str, Any]:
         return {
             "event_id": self.event_id,
@@ -25,9 +26,9 @@ class DomainEvent(ABC):
             "aggregate_id": str(self.aggregate_id),
             "event_data": self.event_data.to_dict(),
             "occurred_on": self.occurred_on.isoformat(),
-            "version": self.version
+            "version": self.version,
         }
-    
-    @abstractmethod  
+
+    @abstractmethod
     def __repr__(self) -> str:
-        pass 
+        pass

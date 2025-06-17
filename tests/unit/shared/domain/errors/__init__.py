@@ -1,1 +1,1 @@
-# Errors domain unit tests package 
+# Errors domain unit tests package

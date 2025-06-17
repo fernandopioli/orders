@@ -25,10 +25,19 @@ O projeto segue a Clean Architecture com as seguintes camadas:
 ## Executando Testes
 
 ```bash
-poetry run python -m pytest --cov=src --cov-report=term-missing
+poetry run pytest
 ```
 
-poetry env info --path
+
+# Comands
+- poetry add --dev black
+- poetry env info --path
+- poetry run python manage.py runserver
+- poetry run pytest
+- poetry run ruff format --check .
+- poetry run ruff format .
+- poetry run ruff check --fix .
+
 
 - DDD
 - Clean Arch
