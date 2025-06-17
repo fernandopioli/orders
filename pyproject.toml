@@ -39,6 +39,7 @@ line-length = 100
 [tool.ruff.lint]
 select = ["E", "F", "I"]
 fixable = ["ALL"]
+ignore = ["F403"]
 
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "web.config.settings.testing"
